@@ -1,0 +1,71 @@
+WEBRTC_BASE_DIR=../../../webrtc
+compilation_mode=release
+include ../../compiler.head
+ 
+DIR=dir
+OBJ_DIR=obj
+BIN_DIR=.
+BIN_NAME=webrtc_linux_viewer
+TARGET=$(BIN_DIR)/$(BIN_NAME)
+
+#CPP
+SRC_CPP+=main.cpp
+SRC_CPP+=webrtc_viewer_wnd.cpp
+SRC_CPP+=webrtc_callback_impl.cpp
+SRC_CPP+=../../decoder/decoder.cpp
+#SRC_CPP+=vinagre_connection.cpp
+SRC_CPP+=log.cpp
+SRC_CPP+=version.cpp
+SRC_CPP+=AirMirrorImageTexture.cpp
+SRC_CPP+=AirMirrorRenderer.cpp
+
+SRC_C+=$(WEBRTC_BASE_DIR)/third_party/boringssl/src/decrepit/bio/base64_bio.c
+
+OBJ_FILES+=$(SRC_CPP:%.cpp=%.o)
+DWO_FILES+=$(SRC_CPP:%.cpp=%.dwo)
+OBJ_FILES+=$(SRC_C:%.c=%.o)
+DWO_FILES+=$(SRC_C:%.c=%.dwo)
+
+ifeq ($(compilation_mode), debug)
+DEFINES_=-DUSE_WEBSOCKET -DINTERNET_SERVER -DWOW_ARM_LINUX -DWOW_LINUX -DVIEWER_SUPPORT -DUSE_WEBSOCKET -DV8_DEPRECATION_WARNINGS -DUSE_UDEV -DUSE_AURA=1 -DUSE_GLIB=1 -DUSE_NSS_CERTS=1 -DUSE_X11=1 -DFULL_SAFE_BROWSING -DSAFE_BROWSING_CSD -DSAFE_BROWSING_DB_LOCAL -DCHROMIUM_BUILD -DFIELDTRIAL_TESTING_ENABLED -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_DEBUG -DDYNAMIC_ANNOTATIONS_ENABLED=1 -DWTF_USE_DYNAMIC_ANNOTATIONS=1 -D_GLIBCXX_DEBUG=1 -DWEBRTC_ENABLE_PROTOBUF=1 -DWEBRTC_INCLUDE_INTERNAL_AUDIO_DEVICE -DHAVE_SCTP -DWEBRTC_NON_STATIC_TRACE_EVENT_HANDLERS=0 -DWEBRTC_POSIX -DWEBRTC_LINUX -DHAVE_WEBRTC_VIDEO -DHAVE_WEBRTC_VOICE
+else
+DEFINES_=-DUSE_WEBSOCKET -DINTERNET_SERVER -DWOW_ARM_LINUX -DWOW_LINUX -DVIEWER_SUPPORT -DUSE_WEBSOCKET -DV8_DEPRECATION_WARNINGS -DUSE_UDEV -DUSE_AURA=1 -DUSE_GLIB=1 -DUSE_NSS_CERTS=1 -DUSE_X11=1 -DFULL_SAFE_BROWSING -DSAFE_BROWSING_CSD -DSAFE_BROWSING_DB_LOCAL -DCHROMIUM_BUILD -DFIELDTRIAL_TESTING_ENABLED -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D_FORTIFY_SOURCE=2 -DNDEBUG -DNVALGRIND -DDYNAMIC_ANNOTATIONS_ENABLED=0 -DWEBRTC_ENABLE_PROTOBUF=1 -DWEBRTC_INCLUDE_INTERNAL_AUDIO_DEVICE -DHAVE_SCTP -DWEBRTC_NON_STATIC_TRACE_EVENT_HANDLERS=0 -DWEBRTC_POSIX -DWEBRTC_LINUX -DHAVE_WEBRTC_VIDEO -DHAVE_WEBRTC_VOICE
+endif
+
+SEARCH_HEADERS=-I$(WEBRTC_BASE_DIR) -I$(WEBRTC_BASE_DIR)/third_party/boringssl/src -I$(WEBRTC_BASE_DIR)/third_party/boringssl/src/include -I$(WEBRTC_BASE_DIR)/third_party/libyuv/include/ -I$(WEBRTC_BASE_DIR)/third_party/jsoncpp/source/include/ -I../../decoder/mpp_decoder/ -I/usr/include/rockchip/ -I/usr/include/libdrm
+SEARCH_HEADER_WRAPPER=-I../../ -I../../../boost/
+SEARCH_STANDARD_HEADER=-I/usr/include/glib-2.0/ -I/usr/lib64/glib-2.0/include/ -I/usr/include -I/usr/include/gstreamer-1.0/ -I/usr/lib64/gstreamer-1.0/include/
+
+ifeq ($(compilation_mode), debug)
+BUILD_MODE_CFLAGS=-g -O0 -gsplit-dwarf -Wdeprecated-declarations
+else
+BUILD_MODE_CFLAGS=-O2 -fno-ident -fdata-sections -ffunction-sections
+endif
+
+#CFLAGS=$(BUILD_MODE_CFLAGS) $(DEFINES_) $(SEARCH_HEADERS) $(SEARCH_HEADER_WRAPPER) -Wno-deprecated-declarations -fno-strict-aliasing --param=ssp-buffer-size=4 -fstack-protector -Wno-builtin-macro-redefined -D__DATE__= -D__TIME__= -D__TIMESTAMP__= -funwind-tables -fPIC -pipe -B$(WEBRTC_BASE_DIR)/third_party/binutils/Linux_x64/Release/bin -pthread -Wall -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wno-deprecated-declarations -fno-delete-null-pointer-checks -Wno-missing-field-initializers -Wno-unused-parameter -fno-omit-frame-pointer -fvisibility=hidden -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-strict-overflow
+CFLAGS=$(BUILD_MODE_CFLAGS) $(DEFINES_) $(SEARCH_HEADERS) $(SEARCH_HEADER_WRAPPER) -Wno-deprecated-declarations -fno-strict-aliasing --param=ssp-buffer-size=4 -fstack-protector -Wno-builtin-macro-redefined -D__DATE__= -D__TIME__= -D__TIMESTAMP__= -funwind-tables -fPIC -pipe -pthread -march=armv7-a -mfloat-abi=hard -mtune=generic-armv7-a -mfpu=neon -mthumb -Wall -Wno-unused-local-typedefs -Wno-maybe-uninitialized -Wno-deprecated-declarations -fno-delete-null-pointer-checks -Wno-missing-field-initializers -Wno-unused-parameter -fno-omit-frame-pointer -fvisibility=hidden -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wno-strict-overflow
+
+CPPFLAGS=$(BUILD_MODE_CFLAGS) $(DEFINES_) $(SEARCH_HEADERS) $(SEARCH_HEADER_WRAPPER) $(SEARCH_STANDARD_HEADER) -std=gnu++17 -Wno-narrowing -fexceptions    -fno-rtti -fvisibility-inlines-hidden -Wnon-virtual-dtor -Woverloaded-virtual 
+
+
+ifeq ($(compilation_mode), debug)
+LDFLAGS=-Wl,--fatal-warnings -fPIC -Wl,-z,noexecstack -Wl,-z,now -Wl,-z,relro -Wl,-z,defs -Wl,--no-as-needed -lpthread -Wl,--as-needed -fuse-ld=gold -B$(WEBRTC_BASE_DIR)/third_party/binutils/Linux_x64/Release/bin -Wl,--threads -Wl,--thread-count=4 -Wl,--icf=all -Wl,--gdb-index -Wl,--disable-new-dtags -Wl,--export-dynamic
+else
+LDFLAGS=-Wl,--fatal-warnings -fPIC -Wl,-z,noexecstack -Wl,-z,now -Wl,-z,relro -Wl,-z,defs -Wl,--no-as-needed -lpthread -Wl,--as-needed -fuse-ld=gold -B$(WEBRTC_BASE_DIR)/third_party/binutils/Linux_x64/Release/bin -Wl,--threads -Wl,--thread-count=4 -Wl,--icf=all -Wl,-O1 -Wl,--gc-sections -Wl,--disable-new-dtags -Wl,--export-dynamic
+endif
+
+ifeq ($(compilation_mode), debug)
+WEBRTC_BASE_LIB_DIR=-L../../../webrtc/webrtc_lib_linux_gcc_debug
+WEBRTC_WRAPPER_LIB_DIR=-L../../../webrtc_wrapper_linux_lib/lib/debug/
+else
+WEBRTC_BASE_LIB_DIR=-L../../../webrtc/webrtc_lib_linux_arm32_release
+WEBRTC_WRAPPER_LIB_DIR=-L../../../webrtc_wrapper_linux_lib/lib/release
+endif
+
+WEBRTC_LIBS=-lwebrtc
+WEBRTC_WRAPPER_LIB=-l:signaling_msg_parser.a -l:internet_signaller.a -l:wow_webrtc_viewer.a -l:json_utility.a  -l:ViaFileReader.a -l:file_logging_helper.a -l:logger.a -l:decoder.a -l:mpp_decoder.a -L../../../boost/stage/arm_lib -lboost_system
+
+GTK3_LIBS=
+SYSTEM_LIBS=-lpthread -lX11 -ldl -lrockchip_mpp -ldrm $(GTK3_LIBS) -lstdc++fs -lEGL -lGLESv2 
+
+LIBS=$(WEBRTC_WRAPPER_LIB_DIR) $(WEBRTC_WRAPPER_LIB) $(WEBRTC_BASE_LIB_DIR) $(WEBRTC_LIBS) $(SYSTEM_LIBS)
